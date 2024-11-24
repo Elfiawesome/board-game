@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://kualn55t530t"]
-
-[ext_resource type="Script" path="res://scenes/rooms/game_room/game_room_client.gd" id="1_j8pw2"]
-
-[node name="GameRoomClient" type="Node2D"]
-script = ExtResource("1_j8pw2")

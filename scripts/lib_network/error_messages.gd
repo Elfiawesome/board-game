@@ -1,0 +1,9 @@
+class_name NetworkLostMsg extends Object
+
+enum ERR {
+	CONNECTION_LOST = 0,
+	UNABLE_TO_PARSE_USERDATA,
+	COULD_NOT_ACCEPT,
+	DUPLICATE_USERNAME,
+	MISC,
+}

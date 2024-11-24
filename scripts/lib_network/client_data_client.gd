@@ -1,6 +1,6 @@
 class_name ClientDataClient extends ClientData
 
-signal connection_lost(error_id:int, custom_text:String)
+signal connection_lost(error_id:NetworkLostMsg.ERR, custom_text:String)
 signal data_received(data:Variant)
 signal connected()
 
@@ -18,13 +18,13 @@ func update() -> void:
 		# Do nothing
 		pass
 	elif status == StreamPeerTCP.STATUS_NONE or status == StreamPeerTCP.STATUS_ERROR:
-		close_connection(0)
+		close_connection(NetworkLostMsg.ERR.CONNECTION_LOST)
 	
 	while(peer.get_available_packet_count()>0):
 		data_received.emit(peer.get_var())
 
 
-func close_connection(error_id:int, custom_text:String = "") -> void:
+func close_connection(error_id:NetworkLostMsg.ERR, custom_text:String = "") -> void:
 	connection_lost.emit(error_id, custom_text)
 	has_connected = false
 	connection.disconnect_from_host()

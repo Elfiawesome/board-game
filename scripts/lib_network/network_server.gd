@@ -12,7 +12,7 @@ var port:int
 signal client_requested_connection(waiting_client_id:int, client_id:int, userdata:Dictionary)
 
 signal client_connected(client_id:int, userdata:Dictionary)
-signal client_disconnected(client_id:int, error_id:int, custom_text:String)
+signal client_disconnected(client_id:int, error_id:NetworkLostMsg.ERR, custom_text:String)
 signal data_received(client_id:int, data:Array, channel:int)
 
 signal server_failed(error:int)
@@ -71,7 +71,7 @@ func _on_client_waiting_data_received(waiting_client_id:int, data:Variant) -> vo
 				
 				# If a username of the same name is already connected, reject the connection
 				if client_datas.has(hashed_username):
-					client_data.close_connection(ERR.DUPLICATE_USERNAME)
+					client_data.close_connection(NetworkLostMsg.ERR.DUPLICATE_USERNAME)
 					return
 				
 				# Wait approval from other system through emiting this signal
@@ -80,7 +80,7 @@ func _on_client_waiting_data_received(waiting_client_id:int, data:Variant) -> vo
 				return
 	
 	# If unable to parse user_data/failed to, close the connection
-	client_data.close_connection(ERR.UNABLE_TO_PARSE_USERDATA, "Unable to parse userdata of "+str(userdata))
+	client_data.close_connection(NetworkLostMsg.ERR.UNABLE_TO_PARSE_USERDATA, "Unable to parse userdata of "+str(userdata))
 func _on_client_waiting_connection_lost(waiting_client_id:int, error_id:int, custom_text:String) -> void:
 	send_data_waiting_clients(waiting_client_id, [1, {"error_id":error_id,"custom_text":custom_text}], 0)
 	if waiting_clients.has(waiting_client_id):
@@ -102,7 +102,7 @@ func accept_waiting_client(waiting_client_id:int, client_id:int, userdata:Dictio
 	send_data(client_id, [0, client_id], 0)
 	# Signal that connection is successful
 	client_connected.emit(client_id, userdata)
-func reject_waiting_client(waiting_client_id:int, error_reason:int = ERR.COULD_NOT_ACCEPT) -> void:
+func reject_waiting_client(waiting_client_id:int, error_reason:NetworkLostMsg.ERR = NetworkLostMsg.ERR.COULD_NOT_ACCEPT) -> void:
 	var client_data:ClientDataServer = waiting_clients[waiting_client_id]
 	client_data.close_connection(error_reason)
 
@@ -127,11 +127,3 @@ func send_data(client_id:int, data:Variant, channel:int = 1) -> void:
 func send_data_waiting_clients(waiting_client_id:int, data:Variant, channel:int = 1) -> void:
 	if waiting_clients.has(waiting_client_id):
 		waiting_clients[waiting_client_id].peer.put_var([channel, data])
-
-# Move this outta here and have it so we can set the ERR enum through initialization (apparently enums are just dicts in disguise bruh)
-enum ERR {
-	CONNECTION_LOST = 0,
-	UNABLE_TO_PARSE_USERDATA = 1,
-	COULD_NOT_ACCEPT,
-	DUPLICATE_USERNAME,
-}
